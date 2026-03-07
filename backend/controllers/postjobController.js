@@ -39,7 +39,7 @@ export const getAllJobs = async(req,res) => {
                 {description:{$regex:keyword, $options:'i'}},
             ]
         }
-        const jobs = await Job.find(query).populate('company', 'name').populate('created_by', 'name')
+        const jobs = await Job.find(query).populate({path: 'company', select: 'name'}).populate({path: 'created_by', select: 'name'})
         res.status(200).json({jobs})
 
         if(!jobs){
@@ -64,17 +64,20 @@ export const getJobById = async(req,res) => {
 }
 
 //how many jobs admin created
-export const getAdminJobs = async(req,res) => {
-    try {
-        const adminId = req.user.userId
-        const jobs = await Job.find({created_by:adminId}).populate('company', 'name')
-        res.status(200).json({jobs})
+export const getAdminJobs = async (req, res) => {
+  try {
 
-        if(!jobs){
-            return res.status(404).json({message:"No jobs found"})
-        }
-        
-    } catch (error) {
-        res.status(500).json({message:error.message})
+    const adminId = req.user.userId
+
+    const jobs = await Job.find({ created_by: adminId }).populate('company', 'name')
+
+    if (!jobs || jobs.length === 0) {
+      return res.status(404).json({ message: "No jobs found" })
     }
+
+    res.status(200).json({ jobs })
+
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
 }
