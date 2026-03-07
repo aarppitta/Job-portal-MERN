@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import userRoutes from './routes/userRoute.js';
 import companyRoutes from './routes/companyRoute.js';
 import postjobRoutes from './routes/postjobRoute.js';
+import applicationRoutes from './routes/applicationRoute.js';
 
 // Load environment variables
 dotenv.config();
@@ -38,6 +39,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes)
 app.use('/api/companies', companyRoutes)
 app.use('/api/jobs', postjobRoutes)
+app.use('/api/applications', applicationRoutes)
 // Error handler
 app.use((err, req, res, next) => {
 	console.error(err.stack);
