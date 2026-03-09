@@ -3,16 +3,85 @@ import Navbar from "../shared/Navbar"
 import { Input } from "../ui/input"
 import { RadioGroup } from "../ui/radio-group"
 import { Button } from "../ui/button"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router-dom"
+import { useState } from "react"
+import api from "../../axios/api"
+import { toast } from "sonner"
+
 
 const Register = () => {
+
+  interface InputState {
+  name: string;
+  email: string;
+  password: string;
+  phoneNumber: string;
+  role: string;
+  file?: File;
+}
+
+const [input, setInput] = useState<InputState>({
+  name: "",
+  email: "",
+  password: "",
+  phoneNumber: "",
+  role: "",
+  file: undefined
+});
+
+const navigate = useNavigate();
+
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setInput({
+    ...input,
+    [e.target.name]: e.target.value
+  });
+};
+
+const changeFileHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setInput({
+    ...input,
+    file: e.target.files?.[0]
+  });
+};
+
+const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append("name", input.name);
+  formData.append("email", input.email);
+  formData.append("password", input.password);
+  formData.append("phoneNumber", input.phoneNumber);
+  formData.append("role", input.role);
+
+  if(input.file){
+    formData.append("file", input.file);
+  }
+  try{
+    const response = await api.post("/users/register", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }, withCredentials: true
+    });
+
+    if(response.data){
+      toast.success("Registration successful! Please login.", response.data.message);
+      navigate("/login");
+    }
+
+  }catch(error){
+    console.error("Error during registration:", error);
+  }
+};
+
   return (
     <div>
       <Navbar />
 
       <div className="flex items-center justify-center max-w-7xl mx-auto">
-        <form className="w-1/2 border border-gray-200 rounded-md p-4 my-10">
-          <h1 className="font-bold text-xl mb-5">Register</h1>
+        <form onSubmit={submitHandler} className="w-1/2 border border-gray-200 rounded-md p-4 my-10">
+          <h1 className="font-bold text-2xl mb-5 justify-center flex ">Register</h1>
           
         <div className="my-2 mb-4">
           <Label>Name</Label>
@@ -20,6 +89,9 @@ const Register = () => {
           type="text"
           placeholder="John Doe"
           className="mt-3"
+          name="name"
+          value={input.name}
+          onChange={handleChange}
           />  
         </div>
 
@@ -29,6 +101,9 @@ const Register = () => {
           type="email"
           placeholder="john.doe@example.com"
           className="mt-3"
+          name="email"
+          value={input.email}
+          onChange={handleChange}
           />  
         </div>
 
@@ -36,8 +111,11 @@ const Register = () => {
           <Label>Password</Label>
           <Input 
           type="password"
-          placeholder="Enter your password"
+          placeholder="*********"
           className="mt-3"
+          name="password"
+          value={input.password}
+          onChange={handleChange}
           />  
         </div>
 
@@ -45,8 +123,11 @@ const Register = () => {
           <Label>Phone Number</Label>
           <Input 
           type="text"
-          placeholder="Enter your phone number"
+          placeholder="9876543210"
           className="mt-3"
+          name="phoneNumber"
+          value={input.phoneNumber}
+          onChange={handleChange}
           />  
         </div>
 
@@ -57,6 +138,8 @@ const Register = () => {
         type="radio"
         name="role"
         value="candidate"
+        checked={input.role === "candidate"}
+        onChange={handleChange}
         className="cursor-pointer"
         />
         <Label htmlFor="r1">Candidate</Label>
@@ -67,6 +150,8 @@ const Register = () => {
         name="role"
         value="recruiter"
         className="cursor-pointer"
+        checked={input.role === "recruiter"}
+        onChange={handleChange}
         />
         <Label htmlFor="r2">Recruiter</Label>
       </div>
@@ -78,6 +163,8 @@ const Register = () => {
     type="file"
     className="cursor-pointer"
     accept="image/*"
+    name="file"
+    onChange={changeFileHandler}
     />
     </div>
         </div>

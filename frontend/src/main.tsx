@@ -4,11 +4,13 @@ import { BrowserRouter } from "react-router-dom"
 
 import "./index.css"
 import App from "./components/App.tsx"
+import { Toaster } from "sonner"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <App />
+      <Toaster />
     </BrowserRouter>
   </StrictMode>
 )

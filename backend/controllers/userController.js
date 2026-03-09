@@ -2,41 +2,47 @@ import User from "../models/User.js"
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
-export const register = async(req,res) => {
-    try{
-        const {name, email, phoneNumber, password, role} = req.body
-        if(!name || !email || !phoneNumber || !password || !role){
-            return res.status(400).json({
-                message:'Error Occured! Something is missing.!'
-            })
-        }
+export const register = async (req, res) => {
+  try {
+    const { name, email, phoneNumber, password, role } = req.body;
 
-        const user = await User.findOne({email})
-        if(user){
-            return res.status(400).json({
-                message:'User already exists with this email'
-            })
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10)
-
-        const newUser = await User.create({
-            name,
-            email,
-            phoneNumber,
-            password: hashedPassword,
-            role
-        })
-        res.status(201).json({
-            message:'User registered successfully',
-            user: newUser
-        })
-
-    }catch(error){
-        res.status(500).json({message:'server error'})
+    if (!name || !email || !phoneNumber || !password || !role) {
+      return res.status(400).json({
+        success:false,
+        message: "Something is missing"
+      });
     }
-}
 
+    const user = await User.findOne({ email });
+
+    if (user) {
+      return res.status(400).json({
+        success:false,
+        message: "User already exists"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+      name,
+      email,
+      phoneNumber,
+      password: hashedPassword,
+      role
+    });
+
+    return res.status(201).json({
+      success:true,
+      message: "User registered successfully",
+      user: newUser
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success:false, message: "Server error" });
+  }
+};
 //login
 export const login = async (req,res) => {
     try{
