@@ -7,7 +7,9 @@ import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import api from "../../axios/api"
 import { toast } from "sonner"
-
+import { useDispatch, useSelector } from "react-redux"
+import { setLoading } from "../../redux/authSlice"
+import { Loader2 } from "lucide-react"
 
 const Register = () => {
 
@@ -20,6 +22,12 @@ const Register = () => {
   file?: File;
 }
 
+interface RootState {
+        auth: {
+            loading: boolean;
+        };
+    }
+
 const [input, setInput] = useState<InputState>({
   name: "",
   email: "",
@@ -29,6 +37,8 @@ const [input, setInput] = useState<InputState>({
   file: undefined
 });
 
+const {loading} = useSelector((store: RootState)=>store.auth)
+const dispatch = useDispatch()
 const navigate = useNavigate();
 
 const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,6 +69,7 @@ const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     formData.append("file", input.file);
   }
   try{
+    dispatch(setLoading(true))
     const response = await api.post("/users/register", formData, {
       headers: {
         "Content-Type": "multipart/form-data"
@@ -72,6 +83,8 @@ const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
 
   }catch(error){
     console.error("Error during registration:", error);
+  }finally{
+    dispatch(setLoading(false))
   }
 };
 
@@ -168,7 +181,11 @@ const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     />
     </div>
         </div>
+         {
+      loading ? <Button className="w-full my-4 h-12 !bg-[#6A38C2]"> <Loader2 className="mr-2 h-4 w-4 animate-spin" />Please wait</Button>: 
         <Button type="submit" className="w-full my-4 h-12 !bg-[#6A38C2] !text-gray-100 cursor-pointer">Register</Button>
+
+    }
         <span>Already have an account? <Link to="/login" className="text-blue-500">Login</Link></span>
         </form>
       </div>

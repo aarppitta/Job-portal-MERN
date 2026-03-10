@@ -7,6 +7,10 @@ import { useState } from "react"
 import { RadioGroup } from "../ui/radio-group"
 import api from "../../axios/api"
 import { toast } from "sonner"
+import { useDispatch, useSelector } from "react-redux"
+import { setLoading } from "../../redux/authSlice"
+import { Loader2 } from "lucide-react"
+
 
 const Login = () => {
 
@@ -16,12 +20,21 @@ const Login = () => {
         role: string;
     }
 
+    interface RootState {
+        auth: {
+            loading: boolean;
+        };
+    }
+
     const [input, setInput] = useState<InputState>({
         email: "",
         password: "",
         role: ""
     })
+
+    const {loading} = useSelector((store: RootState)=>store.auth)
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInput({...input, [e.target.name]: e.target.value})
@@ -30,6 +43,7 @@ const Login = () => {
     const submitHandler = async (e: React.FormEvent<HTMLFormElement>) =>{
         e.preventDefault()
         try {
+            dispatch(setLoading(true))
             const res = await api.post('users/login', input,{
                 headers:{
                     "Content-Type":"application/json"
@@ -44,6 +58,9 @@ const Login = () => {
 
         } catch (error) {
             console.log(error);
+        }finally{
+            dispatch(setLoading(false))
+
         }
     }
   return (
@@ -104,8 +121,11 @@ const Login = () => {
     </RadioGroup>
   </div>
 
-    
+    {
+      loading ? <Button className="w-full my-4 h-12 !bg-[#6A38C2]"> <Loader2 className="mr-2 h-4 w-4 animate-spin" />Please wait</Button>: 
         <Button type="submit" className="w-full my-4 h-12 !bg-[#6A38C2] !text-gray-100 cursor-pointer">Login</Button>
+
+    }
         <span>Don't have an account? <Link to="/register" className="text-blue-500">Register</Link></span>
         </form>
       </div>
